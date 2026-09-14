@@ -15,17 +15,19 @@ Grafo *criarGrafo() {
 bool inserirAresta(Grafo *g, int origem, int destino) {
     if (g == NULL || origem < 0 || origem >= MAX_VERTICES || destino < 0 || destino >= MAX_VERTICES) { return false; }
 
-    bool matrizOk = inserirArestaMatriz(g->matrizAdj, origem, destino);
-
     No *novoNo = criarNo(destino);
-    if (novoNo == NULL) {
+    if (novoNo == NULL) { return false; }
+
+    bool matrizOk = inserirArestaMatriz(g->matrizAdj, origem, destino);
+    if (!matrizOk) {
+        free(novoNo);
         return false;
     }
 
     novoNo->proximo = g->listaAdj[origem];
     g->listaAdj[origem] = novoNo;
 
-    return matrizOk;
+    return true;
 }
 
 bool existeAresta(Grafo *g, int origem, int destino) {
@@ -37,7 +39,15 @@ bool existeAresta(Grafo *g, int origem, int destino) {
 void destruirGrafo(Grafo *g) {
     if (g == NULL) { return; }
 
-    destruirListaAdj(g->listaAdj);
+    for (int i = 0; i < MAX_VERTICES; i++) {
+        No *atual = g->listaAdj[i];
+
+        while (atual != NULL) {
+            No *temp = atual;
+            atual = atual->proximo;
+            free(temp);
+        }
+    }
 
     free(g);
 }
